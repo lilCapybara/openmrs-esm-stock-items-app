@@ -57,13 +57,25 @@ describe('worstStatus', () => {
 describe('buildInventoryItems', () => {
   it('cruza inventario y umbral por sede usando unidades base', () => {
     // Umbral: 2 Cajas de 10 = 20 unidades base
-    const stockItems = [
-      item({ reorderLevel: 2, reorderLevelUoMName: 'Caja', reorderLevelUoMFactor: 10 }),
-    ];
+    const stockItems = [item({ reorderLevel: 2, reorderLevelUoMName: 'Caja', reorderLevelUoMFactor: 10 })];
     // Santa María: 1,5 Cajas (15 unidades) -> bajo. San José: 30 Unidad -> OK.
     const inventory: Array<InventoryRow> = [
-      { stockItemUuid: 'item-1', locationUuid: SM, partyUuid: 'p1', quantity: '1.50000', quantityUoM: 'Caja', quantityFactor: '10' },
-      { stockItemUuid: 'item-1', locationUuid: SJ, partyUuid: 'p2', quantity: 30, quantityUoM: 'Unidad', quantityFactor: 1 },
+      {
+        stockItemUuid: 'item-1',
+        locationUuid: SM,
+        partyUuid: 'p1',
+        quantity: '1.50000',
+        quantityUoM: 'Caja',
+        quantityFactor: '10',
+      },
+      {
+        stockItemUuid: 'item-1',
+        locationUuid: SJ,
+        partyUuid: 'p2',
+        quantity: 30,
+        quantityUoM: 'Unidad',
+        quantityFactor: 1,
+      },
     ];
 
     const [result] = buildInventoryItems(stockItems, inventory, sites, 20);
@@ -75,16 +87,72 @@ describe('buildInventoryItems', () => {
     expect(result.overallStatus).toBe('low');
   });
 
-  it('una sede sin filas de inventario queda sin stock', () => {
+  it('una sede sin movimientos no cuenta para el estado (caso Shampoo / Pasta dental)', () => {
+    const stockItems = [
+      item({
+        uuid: 'shampoo',
+        commonName: 'Shampoo',
+        reorderLevel: 10,
+        reorderLevelUoMName: 'Unidad',
+        reorderLevelUoMFactor: 1,
+      }),
+      item({ uuid: 'pasta', commonName: 'Pasta dental' }),
+      item({ uuid: 'papel', commonName: 'Papel higiénico' }),
+    ];
+    const inventory: Array<InventoryRow> = [
+      {
+        stockItemUuid: 'shampoo',
+        locationUuid: SM,
+        partyUuid: 'p1',
+        quantity: 6,
+        quantityUoM: 'Unidad',
+        quantityFactor: 1,
+      },
+      {
+        stockItemUuid: 'pasta',
+        locationUuid: SM,
+        partyUuid: 'p1',
+        quantity: 5,
+        quantityUoM: 'Unidad',
+        quantityFactor: 1,
+      },
+    ];
+
+    const result = Object.fromEntries(buildInventoryItems(stockItems, inventory, sites, 20).map((r) => [r.uuid, r]));
+
+    expect(result.shampoo.sites[SJ]).toMatchObject({ tracked: false, display: '—' });
+    expect(result.shampoo.overallStatus).toBe('low');
+    expect(result.pasta.overallStatus).toBe('noThreshold');
+    // Sin movimientos en ninguna sede: Sin stock
+    expect(result.papel.overallStatus).toBe('outOfStock');
+  });
+
+  it('una sede que tuvo stock y quedó en 0 sí cuenta como sin stock', () => {
     const [result] = buildInventoryItems(
-      [item({})],
-      [{ stockItemUuid: 'item-1', locationUuid: SM, partyUuid: 'p1', quantity: 5, quantityUoM: 'Unidad', quantityFactor: 1 }],
+      [item({ reorderLevel: 2, reorderLevelUoMFactor: 1 })],
+      [
+        {
+          stockItemUuid: 'item-1',
+          locationUuid: SM,
+          partyUuid: 'p1',
+          quantity: 9,
+          quantityUoM: 'Unidad',
+          quantityFactor: 1,
+        },
+        {
+          stockItemUuid: 'item-1',
+          locationUuid: SJ,
+          partyUuid: 'p2',
+          quantity: 0,
+          quantityUoM: 'Unidad',
+          quantityFactor: 1,
+        },
+      ],
       sites,
       20,
     );
 
-    expect(result.sites[SM].status).toBe('noThreshold');
-    expect(result.sites[SJ]).toMatchObject({ baseQuantity: 0, status: 'outOfStock' });
+    expect(result.sites[SJ]).toMatchObject({ tracked: true, status: 'outOfStock' });
     expect(result.overallStatus).toBe('outOfStock');
   });
 

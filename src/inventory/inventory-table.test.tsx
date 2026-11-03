@@ -42,11 +42,18 @@ const inventory = [
 describe('InventoryTable', () => {
   it('muestra la existencia por sede, el umbral y el aviso de stock bajo', async () => {
     mockUseConfig.mockReturnValue(getDefaultsFromConfigSchema(configSchema) as Config);
-    mockOpenmrsFetch.mockImplementation((url: string) =>
-      Promise.resolve({
-        data: { results: url.includes('stockiteminventory') ? inventory : stockItems },
-      } as any),
-    );
+    // Simula al backend real: el inventario solo responde si se pide un artículo puntual
+    // (stockItemUuid) y devuelve las filas con stockItemUuid vacío.
+    mockOpenmrsFetch.mockImplementation((url: string) => {
+      if (url.includes('stockiteminventory')) {
+        const uuid = new URL(url, 'http://x').searchParams.get('stockItemUuid');
+        const rows = uuid
+          ? inventory.filter((r) => r.stockItemUuid === uuid).map((r) => ({ ...r, stockItemUuid: null }))
+          : [];
+        return Promise.resolve({ data: { results: rows } } as any);
+      }
+      return Promise.resolve({ data: { results: stockItems } } as any);
+    });
 
     render(<InventoryTable />);
 
@@ -55,9 +62,10 @@ describe('InventoryTable', () => {
     expect(screen.getByText('Hogar San José')).toBeInTheDocument();
     expect(screen.getByText('2 Caja')).toBeInTheDocument();
     expect(screen.getByText('3 Caja')).toBeInTheDocument();
-    // Ibuprofeno: 20 unidades en SM (< 30) y 0 en SJ -> Sin stock; aparece el aviso
+    // Ibuprofeno: 20 unidades en SM (< 30) y sin movimientos en SJ -> Stock bajo; aparece el aviso
     expect(screen.getByText('Reposición necesaria')).toBeInTheDocument();
-    expect(screen.getAllByText('Sin stock').length).toBeGreaterThan(0);
+    expect(screen.getByText('Stock bajo')).toBeInTheDocument();
+    expect(screen.queryByText('Sin stock')).not.toBeInTheDocument();
 
     // El filtro "Solo stock bajo" deja solo el ibuprofeno (la pasta está OK en ambas sedes)
     await userEvent.click(screen.getByRole('switch'));

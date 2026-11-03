@@ -1,0 +1,25 @@
+@use '@carbon/layout';
+@use '@carbon/type';
+@use '@carbon/colors';
+
+.label {
+  @include type.type-style('label-01');
+  margin-bottom: layout.$spacing-03;
+}
+
+.units {
+  display: flex;
+  flex-wrap: wrap;
+  gap: layout.$spacing-02;
+}
+
+.hint {
+  @include type.type-style('body-compact-01');
+  color: colors.$gray-70;
+}
+
+.grid {
+  padding-inline: 0;
+  margin-inline: 0;
+  row-gap: layout.$spacing-05;
+}

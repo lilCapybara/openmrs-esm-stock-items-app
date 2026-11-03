@@ -1,0 +1,13 @@
+@use '@carbon/layout';
+@use '@carbon/type';
+
+.grid {
+  padding-inline: 0;
+  margin-inline: 0;
+  row-gap: layout.$spacing-05;
+}
+
+.available {
+  @include type.type-style('body-compact-01');
+  margin-top: calc(-1 * layout.$spacing-03);
+}

@@ -1,0 +1,7 @@
+@use '@carbon/colors';
+
+// Carbon no tiene una variante amarilla de Tag: "Stock bajo" usa una propia.
+:global(.cds--tag).lowStock {
+  background-color: colors.$yellow-30;
+  color: colors.$gray-100;
+}

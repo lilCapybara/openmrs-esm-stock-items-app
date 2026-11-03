@@ -21,10 +21,13 @@ import {
   Dropdown,
   Button,
 } from '@carbon/react';
-import { Add, Renew } from '@carbon/react/icons';
+import { Add, ArrowsVertical, Edit, Renew } from '@carbon/react/icons';
 import { UserHasAccess, useConfig } from '@openmrs/esm-framework';
 import { type Config } from '../config-schema';
 import AddItemModal from '../add-item/add-item-modal.component';
+import EditThresholdModal from '../edit-threshold/edit-threshold-modal.component';
+import MovementModal from '../movement/movement-modal.component';
+import { type StockItem } from '../types';
 import { useInventory } from './inventory.resource';
 import { isAlertStatus } from './inventory.utils';
 import StockStatusTag from './stock-status-tag.component';
@@ -37,8 +40,10 @@ const PAGE_SIZES = [10, 20, 50];
 const InventoryTable: React.FC = () => {
   const { t } = useTranslation();
   const { items, sites, isLoading, isValidating, error, mutate } = useInventory();
-  const { createItemPrivileges } = useConfig<Config>();
+  const { createItemPrivileges, editItemPrivileges, movementPrivileges } = useConfig<Config>();
   const [addOpen, setAddOpen] = useState(false);
+  const [editing, setEditing] = useState<StockItem | null>(null);
+  const [moving, setMoving] = useState<StockItem | null>(null);
 
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
@@ -80,6 +85,7 @@ const InventoryTable: React.FC = () => {
     ...sites.map((site) => ({ key: `site-${site.locationUuid}`, header: site.name })),
     { key: 'threshold', header: t('reorderLevel', 'Nivel de reposición') },
     { key: 'status', header: t('status', 'Estado') },
+    { key: 'actions', header: '' },
   ];
 
   const rows = pageRows.map((item) => {
@@ -90,11 +96,39 @@ const InventoryTable: React.FC = () => {
       category: item.category ?? '—',
       threshold: item.thresholdDisplay ?? '—',
       status: <StockStatusTag status={item.overallStatus} />,
+      actions: (
+        <div className={styles.actions}>
+          <UserHasAccess privilege={movementPrivileges}>
+            <Button
+              kind="ghost"
+              size="sm"
+              hasIconOnly
+              renderIcon={ArrowsVertical}
+              iconDescription={t('registerMovementFor', 'Registrar ingreso o consumo de {{name}}', { name: item.name })}
+              tooltipPosition="left"
+              onClick={() => setMoving(item.stockItem)}
+            />
+          </UserHasAccess>
+          <UserHasAccess privilege={editItemPrivileges}>
+            <Button
+              kind="ghost"
+              size="sm"
+              hasIconOnly
+              renderIcon={Edit}
+              iconDescription={t('editThresholdFor', 'Editar nivel de reposición de {{name}}', { name: item.name })}
+              tooltipPosition="left"
+              onClick={() => setEditing(item.stockItem)}
+            />
+          </UserHasAccess>
+        </div>
+      ),
     };
     for (const site of sites) {
       const stock = item.sites[site.locationUuid];
       row[`site-${site.locationUuid}`] = (
-        <span className={isAlertStatus(stock.status) ? styles.alertQuantity : undefined}>{stock.display}</span>
+        <span className={stock.tracked && isAlertStatus(stock.status) ? styles.alertQuantity : undefined}>
+          {stock.display}
+        </span>
       );
     }
     return row;
@@ -125,9 +159,13 @@ const InventoryTable: React.FC = () => {
           lowContrast
           hideCloseButton
           title={t('lowStockAlertTitle', 'Reposición necesaria')}
-          subtitle={t('lowStockAlertSubtitle', '{{count}} artículo(s) sin stock o por debajo del nivel de reposición.', {
-            count: alertCount,
-          })}
+          subtitle={t(
+            'lowStockAlertSubtitle',
+            '{{count}} artículo(s) sin stock o por debajo del nivel de reposición.',
+            {
+              count: alertCount,
+            },
+          )}
         />
       )}
       <DataTable rows={rows} headers={headers} size="md" useZebraStyles>
@@ -236,6 +274,8 @@ const InventoryTable: React.FC = () => {
         onClose={() => setAddOpen(false)}
         onCreated={() => mutate()}
       />
+      <EditThresholdModal item={editing} onClose={() => setEditing(null)} onSaved={() => mutate()} />
+      <MovementModal item={moving} onClose={() => setMoving(null)} onSaved={() => mutate()} />
     </div>
   );
 };

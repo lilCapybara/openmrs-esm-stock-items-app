@@ -2,6 +2,7 @@ import React from 'react';
 import { Tag } from '@carbon/react';
 import { useTranslation } from 'react-i18next';
 import { type StockStatus } from '../types';
+import styles from './stock-status-tag.scss';
 
 const tagType: Record<StockStatus, 'red' | 'magenta' | 'warm-gray' | 'green' | 'gray'> = {
   outOfStock: 'red',
@@ -27,7 +28,7 @@ const StockStatusTag: React.FC<StockStatusTagProps> = ({ status }) => {
   };
 
   return (
-    <Tag type={tagType[status]} size="sm">
+    <Tag type={tagType[status]} size="sm" className={status === 'low' ? styles.lowStock : undefined}>
       {labels[status]}
     </Tag>
   );

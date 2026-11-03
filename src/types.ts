@@ -12,7 +12,17 @@ export interface StockItem {
   reorderLevel: number | null;
   reorderLevelUoMName: string | null;
   reorderLevelUoMFactor: number | null;
+  reorderLevelUoMUuid?: string | null;
+  packagingUnits?: Array<PackagingUnit>;
   voided?: boolean;
+}
+
+/** Unidad de empaque de un artículo (stockitempackaginguom). */
+export interface PackagingUnit {
+  uuid: string;
+  packagingUomUuid: string;
+  packagingUomName: string;
+  factor: number | string;
 }
 
 /** Fila de GET stockmanagement/stockiteminventory?groupBy=LocationStockItem. */
@@ -36,6 +46,8 @@ export interface SiteStock {
   /** Texto para mostrar, ej. "6 Unidad". */
   display: string;
   status: StockStatus;
+  /** false si el artículo nunca tuvo movimientos en esta sede: no se considera para el estado. */
+  tracked: boolean;
 }
 
 export interface InventoryItem {
@@ -49,4 +61,6 @@ export interface InventoryItem {
   sites: Record<string, SiteStock>;
   /** Peor estado entre todas las sedes. */
   overallStatus: StockStatus;
+  /** Artículo original, para poder editarlo. */
+  stockItem: StockItem;
 }

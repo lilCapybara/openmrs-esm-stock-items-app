@@ -97,9 +97,13 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ open, existingNames, onClos
         isLowContrast: true,
         title: t('itemCreated', 'Artículo creado'),
         subtitle: result.reusedConcept
-          ? t('itemCreatedReused', '{{name}} se agregó al inventario (se reutilizó un concepto existente con ese nombre).', {
-              name: itemName,
-            })
+          ? t(
+              'itemCreatedReused',
+              '{{name}} se agregó al inventario (se reutilizó un concepto existente con ese nombre).',
+              {
+                name: itemName,
+              },
+            )
           : t('itemCreatedSubtitle', '{{name}} se agregó al inventario.', { name: itemName }),
       });
       setValues(emptyAddItemForm);
@@ -141,7 +145,10 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ open, existingNames, onClos
             lowContrast
             hideCloseButton
             title={t('errorLoadingOptions', 'No se pudieron cargar las unidades o categorías')}
-            subtitle={t('checkConfig', 'Revisá los UUID de packagingUnitsConceptUuid y categoriesConceptUuid en la configuración.')}
+            subtitle={t(
+              'checkConfig',
+              'Revisá los UUID de packagingUnitsConceptUuid y categoriesConceptUuid en la configuración.',
+            )}
           />
         )}
 
@@ -161,7 +168,11 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ open, existingNames, onClos
             <TextInput
               id="item-name"
               labelText={values.kind === 'drug' ? t('genericName', 'Nombre genérico') : t('itemName', 'Nombre')}
-              placeholder={values.kind === 'drug' ? t('genericNamePlaceholder', 'Ej. Ibuprofeno') : t('itemNamePlaceholder', 'Ej. Pasta dental')}
+              placeholder={
+                values.kind === 'drug'
+                  ? t('genericNamePlaceholder', 'Ej. Ibuprofeno')
+                  : t('itemNamePlaceholder', 'Ej. Pasta dental')
+              }
               value={values.name}
               onChange={(e) => set('name', e.target.value)}
               invalid={!!errors.name}
@@ -188,6 +199,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ open, existingNames, onClos
         <Grid condensed className={styles.grid}>
           <Column sm={4} md={5} lg={10}>
             <ComboBox
+              autoAlign
               id="item-category"
               titleText={t('category', 'Categoría')}
               placeholder={t('chooseCategory', 'Elegí una categoría')}
@@ -215,13 +227,17 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ open, existingNames, onClos
         <Grid condensed className={styles.grid}>
           <Column sm={4} md={8} lg={16}>
             <ComboBox
+              autoAlign
               id="item-base-unit"
               titleText={
                 values.kind === 'drug'
                   ? t('baseUnitDrug', 'Unidad base / forma farmacéutica')
                   : t('baseUnitLabel', 'Unidad base')
               }
-              helperText={t('baseUnitHelper', 'La unidad más chica en la que se cuenta y se entrega (ej. Unidad, Comprimido, Mililitro).')}
+              helperText={t(
+                'baseUnitHelper',
+                'La unidad más chica en la que se cuenta y se entrega (ej. Unidad, Comprimido, Mililitro).',
+              )}
               placeholder={t('chooseUnit', 'Elegí una unidad')}
               selectedItem={baseUnit ?? null}
               onChange={({ selectedItem }) => set('baseUnitUuid', selectedItem?.uuid ?? '')}
@@ -235,6 +251,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ open, existingNames, onClos
         <Grid condensed className={styles.grid}>
           <Column sm={4} md={5} lg={10}>
             <ComboBox
+              autoAlign
               id="item-pack-unit"
               titleText={t('packUnitOptional', 'Unidad mayor (opcional)')}
               helperText={t('packUnitHelper', 'Si se compra o guarda en cajas, frascos, paquetes, etc.')}
@@ -257,7 +274,10 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ open, existingNames, onClos
               id="item-pack-factor"
               label={
                 packUnit && baseUnit
-                  ? t('packFactorLabel', 'Cantidad por {{pack}} (en {{base}})', { base: baseUnit.display, pack: packUnit.display })
+                  ? t('packFactorLabel', 'Cantidad por {{pack}} (en {{base}})', {
+                      base: baseUnit.display,
+                      pack: packUnit.display,
+                    })
                   : t('packFactorGeneric', 'Cantidad por unidad mayor')
               }
               min={2}
@@ -317,6 +337,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ open, existingNames, onClos
           </Column>
           <Column sm={4} md={4} lg={8}>
             <ComboBox
+              autoAlign
               id="item-reorder-unit"
               titleText={t('reorderLevelUnit', 'Expresado en')}
               items={reorderUnitOptions}

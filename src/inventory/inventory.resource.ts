@@ -27,13 +27,47 @@ async function fetchAllPages<T>(url: string): Promise<Array<T>> {
 }
 
 export const stockItemsUrl = `${restBaseUrl}/stockmanagement/stockitem?v=full&limit=100`;
-export const inventoryUrl = `${restBaseUrl}/stockmanagement/stockiteminventory?v=default&groupBy=LocationStockItem&includeStockItemName=true`;
+
+export function inventoryUrlFor(stockItemUuid: string) {
+  return `${restBaseUrl}/stockmanagement/stockiteminventory?v=default&groupBy=LocationStockItem&stockItemUuid=${stockItemUuid}`;
+}
+
+/** Cuántos pedidos de inventario se hacen a la vez. */
+const CONCURRENCY = 6;
+
+/**
+ * El endpoint de inventario del módulo de stock no devuelve nada si no se le indica un artículo
+ * (requireItemGroupFilters), así que se consulta artículo por artículo. Además, en esa respuesta
+ * stockItemUuid viene vacío: se lo asignamos acá a partir del artículo consultado.
+ */
+export async function fetchInventoryForItems(stockItemUuids: Array<string>): Promise<Array<InventoryRow>> {
+  const results: Array<Array<InventoryRow>> = new Array(stockItemUuids.length);
+  let cursor = 0;
+  const worker = async () => {
+    while (cursor < stockItemUuids.length) {
+      const index = cursor++;
+      const uuid = stockItemUuids[index];
+      const rows = await fetchAllPages<InventoryRow>(inventoryUrlFor(uuid));
+      results[index] = rows.map((row) => ({ ...row, stockItemUuid: uuid }));
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, stockItemUuids.length) }, worker));
+  return results.flat();
+}
 
 export function useInventory() {
   const { sites, lowStockMarginPercent } = useConfig<Config>();
 
   const stockItems = useSWR<Array<StockItem>, Error>(stockItemsUrl, fetchAllPages<StockItem>);
-  const inventory = useSWR<Array<InventoryRow>, Error>(inventoryUrl, fetchAllPages<InventoryRow>);
+
+  const activeUuids = useMemo(
+    () => (stockItems.data ?? []).filter((i) => !i.voided).map((i) => i.uuid),
+    [stockItems.data],
+  );
+  const inventory = useSWR<Array<InventoryRow>, Error>(
+    stockItems.data ? ['stock-inventory', ...activeUuids] : null,
+    () => fetchInventoryForItems(activeUuids),
+  );
 
   const items = useMemo(
     () => buildInventoryItems(stockItems.data ?? [], inventory.data ?? [], sites, lowStockMarginPercent),
@@ -43,7 +77,7 @@ export function useInventory() {
   return {
     items,
     sites,
-    isLoading: stockItems.isLoading || inventory.isLoading,
+    isLoading: stockItems.isLoading || (!!stockItems.data && inventory.isLoading),
     isValidating: stockItems.isValidating || inventory.isValidating,
     error: stockItems.error ?? inventory.error,
     mutate: () => Promise.all([stockItems.mutate(), inventory.mutate()]),

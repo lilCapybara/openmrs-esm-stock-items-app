@@ -1,11 +1,5 @@
 import { type SiteConfig } from '../config-schema';
-import {
-  type InventoryItem,
-  type InventoryRow,
-  type SiteStock,
-  type StockItem,
-  type StockStatus,
-} from '../types';
+import { type InventoryItem, type InventoryRow, type SiteStock, type StockItem, type StockStatus } from '../types';
 
 /** Orden de gravedad: el primero es el peor. */
 const STATUS_SEVERITY: Array<StockStatus> = ['outOfStock', 'low', 'nearThreshold', 'ok', 'noThreshold'];
@@ -58,6 +52,15 @@ export function worstStatus(statuses: Array<StockStatus>): StockStatus {
   );
 }
 
+/**
+ * Estado general del artículo: el peor entre las sedes donde se maneja.
+ * Si no tuvo movimientos en ninguna sede, está "Sin stock".
+ */
+export function overallStatusFor(sites: Array<SiteStock>): StockStatus {
+  const tracked = sites.filter((s) => s.tracked);
+  return tracked.length === 0 ? 'outOfStock' : worstStatus(tracked.map((s) => s.status));
+}
+
 export function isAlertStatus(status: StockStatus): boolean {
   return status === 'outOfStock' || status === 'low';
 }
@@ -99,8 +102,11 @@ export function buildInventoryItems(
         const rows = index.get(item.uuid)?.get(site.locationUuid) ?? [];
         const baseQuantity = rows.reduce((sum, r) => sum + toNumber(r.quantity) * (toNumber(r.quantityFactor) || 1), 0);
         // Si hay una sola fila mostramos la unidad que eligió el backend; si no, en unidades base.
-        const display =
-          rows.length === 1
+        // Sin filas = el artículo nunca tuvo movimientos en esta sede (no se maneja ahí).
+        const tracked = rows.length > 0;
+        const display = !tracked
+          ? '—'
+          : rows.length === 1
             ? `${formatQuantity(toNumber(rows[0].quantity))} ${rows[0].quantityUoM ?? ''}`.trim()
             : formatQuantity(baseQuantity);
         sitesStock[site.locationUuid] = {
@@ -108,6 +114,7 @@ export function buildInventoryItems(
           baseQuantity,
           display,
           status: getStockStatus(baseQuantity, thresholdBase, marginPercent),
+          tracked,
         };
       }
 
@@ -119,7 +126,8 @@ export function buildInventoryItems(
         thresholdBase,
         thresholdDisplay,
         sites: sitesStock,
-        overallStatus: worstStatus(Object.values(sitesStock).map((s) => s.status)),
+        overallStatus: overallStatusFor(Object.values(sitesStock)),
+        stockItem: item,
       } satisfies InventoryItem;
     })
     .sort((a, b) => {

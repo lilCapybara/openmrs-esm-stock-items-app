@@ -11,6 +11,13 @@
   max-width: 100%;
 }
 
+// La hoja de estilos de O3 pone .cds--table-toolbar en position:absolute (pensado para tablas
+// con encabezado propio); sin esto la barra tapa la fila de encabezados de la tabla.
+.container :global(.cds--table-toolbar) {
+  position: relative;
+  top: 0;
+}
+
 .toolbar {
   align-items: center;
   gap: layout.$spacing-03;
@@ -33,4 +40,10 @@
 .emptyState {
   text-align: center;
   padding: layout.$spacing-07;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: layout.$spacing-02;
 }

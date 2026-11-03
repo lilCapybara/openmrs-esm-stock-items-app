@@ -66,6 +66,44 @@ export const configSchema = {
       'Privilegios necesarios para ver el botón "Nuevo artículo" (deben cumplirse todos). Por defecto solo los tiene la administración.',
     _default: ['Task: stockmanagement.stockItems.mutate', 'Manage Concepts'],
   },
+  editItemPrivileges: {
+    _type: Type.Array,
+    _elements: { _type: Type.String },
+    _description: 'Privilegios necesarios para editar el nivel de reposición y agregar unidades a un artículo.',
+    _default: ['Task: stockmanagement.stockItems.mutate'],
+  },
+  movementPrivileges: {
+    _type: Type.Array,
+    _elements: { _type: Type.String },
+    _description: 'Privilegios necesarios para registrar ingresos y consumos desde la tabla.',
+    _default: ['Task: stockmanagement.stockoperations.mutate'],
+  },
+  receiptOperationTypeUuid: {
+    _type: Type.UUID,
+    _description: 'Tipo de operación usado para los ingresos (Receipt del módulo de stock).',
+    _default: '44444444-4444-4444-4444-444444444444',
+  },
+  adjustmentOperationTypeUuid: {
+    _type: Type.UUID,
+    _description: 'Tipo de operación usado para los consumos y egresos (Adjustment del módulo de stock).',
+    _default: '11111111-1111-1111-1111-111111111111',
+  },
+  adjustmentReasonsConceptUuid: {
+    _type: Type.ConceptUuid,
+    _description: 'Concepto (Coded) con los motivos de egreso (stockAdjustmentReasonUUID).',
+    _default: '33c6d40e-2b7b-4602-a408-c5fe269a7756',
+  },
+  defaultConsumptionReasonUuid: {
+    _type: Type.ConceptUuid,
+    _description: 'Motivo preseleccionado para los egresos (Consumo).',
+    _default: 'a385fab6-8ff6-4d0b-abca-7bf04a1836f5',
+  },
+  noBatchNumber: {
+    _type: Type.String,
+    _description:
+      'Número de lote que se usa para los artículos que no vencen (el módulo de stock exige un lote en todo ingreso).',
+    _default: 'SIN-LOTE',
+  },
 };
 
 export interface SiteConfig {
@@ -83,4 +121,11 @@ export interface Config {
   naDatatypeUuid: string;
   conceptLocale: string;
   createItemPrivileges: Array<string>;
+  editItemPrivileges: Array<string>;
+  movementPrivileges: Array<string>;
+  receiptOperationTypeUuid: string;
+  adjustmentOperationTypeUuid: string;
+  adjustmentReasonsConceptUuid: string;
+  defaultConsumptionReasonUuid: string;
+  noBatchNumber: string;
 }

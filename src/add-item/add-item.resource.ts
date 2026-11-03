@@ -1,12 +1,7 @@
 import useSWR from 'swr';
 import { openmrsFetch, restBaseUrl } from '@openmrs/esm-framework';
 import { type Config } from '../config-schema';
-import {
-  AddItemError,
-  type AddItemFormValues,
-  type AddItemResult,
-  type AddItemStep,
-} from './add-item.types';
+import { AddItemError, type AddItemFormValues, type AddItemResult, type AddItemStep } from './add-item.types';
 import { buildItemName, defaultAcronym, normalizeName, toNumberOrNull } from './add-item.utils';
 
 export interface ConceptOption {
@@ -98,7 +93,9 @@ export async function createStockItemWithSetup(
       return { uuid: existing.uuid, reused: true };
     }
     const created = await postJson<{ uuid: string }>(`${restBaseUrl}/concept`, {
-      names: [{ name: conceptName, locale: config.conceptLocale, conceptNameType: 'FULLY_SPECIFIED', localePreferred: true }],
+      names: [
+        { name: conceptName, locale: config.conceptLocale, conceptNameType: 'FULLY_SPECIFIED', localePreferred: true },
+      ],
       datatype: config.naDatatypeUuid,
       conceptClass: isDrug ? config.drugConceptClassUuid : config.miscConceptClassUuid,
     });

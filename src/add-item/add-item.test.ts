@@ -33,7 +33,9 @@ function mockBackend(options: { existingConcept?: boolean; failPackaging?: boole
     calls.push({ url, method, body });
 
     if (method === 'GET' && url.includes('/concept?q=')) {
-      return { data: { results: options.existingConcept ? [{ uuid: 'concept-existing', display: 'Pasta Dental' }] : [] } } as any;
+      return {
+        data: { results: options.existingConcept ? [{ uuid: 'concept-existing', display: 'Pasta Dental' }] : [] },
+      } as any;
     }
     if (method === 'GET' && url.includes('/drug?q=')) {
       return { data: { results: [] } } as any;
@@ -86,13 +88,22 @@ describe('add-item.utils', () => {
   });
 
   it('valida la unidad mayor y su factor', () => {
-    expect(validateAddItem(form({ name: 'Guantes', packUnitUuid: CAJA, packFactor: '1' }), { existingNames: [] }).packFactor).toBeDefined();
-    expect(validateAddItem(form({ name: 'Guantes', packUnitUuid: UNIDAD, packFactor: '10' }), { existingNames: [] }).packUnitUuid).toBeDefined();
-    expect(validateAddItem(form({ name: 'Guantes', packUnitUuid: CAJA, packFactor: '100' }), { existingNames: [] })).toEqual({});
+    expect(
+      validateAddItem(form({ name: 'Guantes', packUnitUuid: CAJA, packFactor: '1' }), { existingNames: [] }).packFactor,
+    ).toBeDefined();
+    expect(
+      validateAddItem(form({ name: 'Guantes', packUnitUuid: UNIDAD, packFactor: '10' }), { existingNames: [] })
+        .packUnitUuid,
+    ).toBeDefined();
+    expect(
+      validateAddItem(form({ name: 'Guantes', packUnitUuid: CAJA, packFactor: '100' }), { existingNames: [] }),
+    ).toEqual({});
   });
 
   it('no permite expresar el umbral en unidad mayor si no hay unidad mayor', () => {
-    const errors = validateAddItem(form({ name: 'Guantes', reorderLevel: '2', reorderLevelUnit: 'pack' }), { existingNames: [] });
+    const errors = validateAddItem(form({ name: 'Guantes', reorderLevel: '2', reorderLevelUnit: 'pack' }), {
+      existingNames: [],
+    });
     expect(errors.reorderLevelUnit).toBeDefined();
   });
 });
@@ -107,14 +118,24 @@ describe('createStockItemWithSetup', () => {
 
     const result = await createStockItemWithSetup(form({ name: 'Guantes descartables', reorderLevel: '50' }), config);
 
-    expect(result).toEqual({ stockItemUuid: 'item-new', conceptUuid: 'concept-new', reusedConcept: false, drugUuid: null });
+    expect(result).toEqual({
+      stockItemUuid: 'item-new',
+      conceptUuid: 'concept-new',
+      reusedConcept: false,
+      drugUuid: null,
+    });
     const [concept, item, packaging, update] = posts(calls);
     expect(concept.body).toMatchObject({
       names: [{ name: 'Guantes descartables', locale: 'es', conceptNameType: 'FULLY_SPECIFIED' }],
       conceptClass: 'class-misc',
       datatype: 'datatype-na',
     });
-    expect(item.body).toMatchObject({ conceptUuid: 'concept-new', commonName: 'Guantes descartables', acronym: 'GD', hasExpiration: false });
+    expect(item.body).toMatchObject({
+      conceptUuid: 'concept-new',
+      commonName: 'Guantes descartables',
+      acronym: 'GD',
+      hasExpiration: false,
+    });
     expect(item.body.drugUuid).toBeUndefined();
     expect(packaging.body).toEqual({ stockItemUuid: 'item-new', packagingUomUuid: UNIDAD, factor: 1 });
     expect(update.url).toMatch(/stockitem\/item-new$/);
@@ -148,8 +169,20 @@ describe('createStockItemWithSetup', () => {
     expect(result.drugUuid).toBe('drug-new');
     const [concept, drug, item, base, pack, update] = posts(calls);
     expect(concept.body.conceptClass).toBe('class-drug');
-    expect(drug.body).toEqual({ name: 'Ibuprofeno 400 mg', concept: 'concept-new', dosageForm: COMPRIMIDO, strength: '400 mg', combination: false });
-    expect(item.body).toMatchObject({ drugUuid: 'drug-new', commonName: 'Ibuprofeno 400 mg', hasExpiration: true, expiryNotice: 60, dispensingUnitUuid: COMPRIMIDO });
+    expect(drug.body).toEqual({
+      name: 'Ibuprofeno 400 mg',
+      concept: 'concept-new',
+      dosageForm: COMPRIMIDO,
+      strength: '400 mg',
+      combination: false,
+    });
+    expect(item.body).toMatchObject({
+      drugUuid: 'drug-new',
+      commonName: 'Ibuprofeno 400 mg',
+      hasExpiration: true,
+      expiryNotice: 60,
+      dispensingUnitUuid: COMPRIMIDO,
+    });
     expect(item.body.conceptUuid).toBeUndefined();
     expect(base.body.factor).toBe(1);
     expect(pack.body).toEqual({ stockItemUuid: 'item-new', packagingUomUuid: CAJA, factor: 20 });
