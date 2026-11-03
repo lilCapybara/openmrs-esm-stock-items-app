@@ -1,0 +1,36 @@
+@use '@carbon/layout';
+@use '@carbon/colors';
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: layout.$spacing-05;
+}
+
+.alertBanner {
+  max-width: 100%;
+}
+
+.toolbar {
+  align-items: center;
+  gap: layout.$spacing-03;
+}
+
+.typeFilter {
+  min-width: 14rem;
+}
+
+.toggle {
+  padding: 0 layout.$spacing-03;
+  white-space: nowrap;
+}
+
+.alertQuantity {
+  color: colors.$red-60;
+  font-weight: 600;
+}
+
+.emptyState {
+  text-align: center;
+  padding: layout.$spacing-07;
+}

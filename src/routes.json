@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json.openmrs.org/routes.schema.json",
+  "backendDependencies": {
+    "webservices.rest": ">=2.2.0",
+    "stockmanagement": ">=2.0.0"
+  },
+  "pages": [
+    {
+      "component": "stockItemsPage",
+      "route": "inventario-residencia"
+    }
+  ],
+  "extensions": [
+    {
+      "name": "residencia-inventory-app-menu-item",
+      "component": "inventoryAppMenuItem",
+      "slot": "app-menu-item-slot",
+      "privileges": ["App: stockmanagement.stockItems"],
+      "meta": {
+        "name": "Inventario"
+      }
+    }
+  ]
+}
