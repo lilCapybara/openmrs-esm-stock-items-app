@@ -1,0 +1,17 @@
+@use '@carbon/layout';
+
+.form {
+  padding-bottom: layout.$spacing-05;
+}
+
+.grid {
+  padding-inline: 0;
+  margin-inline: 0;
+  row-gap: layout.$spacing-05;
+}
+
+.indented {
+  margin-top: layout.$spacing-03;
+  margin-left: layout.$spacing-07;
+  max-width: 20rem;
+}

@@ -21,7 +21,10 @@ import {
   Dropdown,
   Button,
 } from '@carbon/react';
-import { Renew } from '@carbon/react/icons';
+import { Add, Renew } from '@carbon/react/icons';
+import { UserHasAccess, useConfig } from '@openmrs/esm-framework';
+import { type Config } from '../config-schema';
+import AddItemModal from '../add-item/add-item-modal.component';
 import { useInventory } from './inventory.resource';
 import { isAlertStatus } from './inventory.utils';
 import StockStatusTag from './stock-status-tag.component';
@@ -34,6 +37,8 @@ const PAGE_SIZES = [10, 20, 50];
 const InventoryTable: React.FC = () => {
   const { t } = useTranslation();
   const { items, sites, isLoading, isValidating, error, mutate } = useInventory();
+  const { createItemPrivileges } = useConfig<Config>();
+  const [addOpen, setAddOpen] = useState(false);
 
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
@@ -175,6 +180,11 @@ const InventoryTable: React.FC = () => {
                   disabled={isValidating}
                   onClick={() => mutate()}
                 />
+                <UserHasAccess privilege={createItemPrivileges}>
+                  <Button kind="primary" size="md" renderIcon={Add} onClick={() => setAddOpen(true)}>
+                    {t('newItem', 'Nuevo artículo')}
+                  </Button>
+                </UserHasAccess>
               </TableToolbarContent>
             </TableToolbar>
             <Table {...getTableProps()}>
@@ -220,6 +230,12 @@ const InventoryTable: React.FC = () => {
           </TableContainer>
         )}
       </DataTable>
+      <AddItemModal
+        open={addOpen}
+        existingNames={items.map((i) => i.name)}
+        onClose={() => setAddOpen(false)}
+        onCreated={() => mutate()}
+      />
     </div>
   );
 };
