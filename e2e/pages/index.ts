@@ -1,1 +1,1 @@
-export * from './root-page';
+export * from './inventory-page';
