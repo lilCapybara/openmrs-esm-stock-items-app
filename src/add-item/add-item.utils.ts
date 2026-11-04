@@ -2,7 +2,12 @@ import { type AddItemErrors, type AddItemFormValues } from './add-item.types';
 
 /** Compara nombres sin importar mayúsculas, tildes ni espacios repetidos. */
 export function normalizeName(value: string): string {
-  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim().toLocaleLowerCase('es');
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLocaleLowerCase('es');
 }
 
 /** "Ibuprofeno" + "400 mg" -> "Ibuprofeno 400 mg". Es el nombre común y el nombre del drug. */

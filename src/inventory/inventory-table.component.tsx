@@ -47,7 +47,10 @@ const InventoryTable: React.FC = () => {
 
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
-  const [onlyAlerts, setOnlyAlerts] = useState(false);
+  // ?soloStockBajo=1 (lo usa la tarjeta de inicio) arranca con el filtro activado
+  const [onlyAlerts, setOnlyAlerts] = useState(
+    () => new URLSearchParams(window.location.search).get('soloStockBajo') === '1',
+  );
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZES[1]);
 

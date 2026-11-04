@@ -148,7 +148,9 @@ describe('registerMovement', () => {
       operationTypeUuid: 'op-receipt',
       sourceUuid: 'party-proveedor',
       destinationUuid: 'party-sm',
-      stockOperationItems: [{ stockItemUuid: 'papel', stockItemPackagingUOMUuid: 'pu-caja', quantity: 3, batchNo: 'SIN-LOTE' }],
+      stockOperationItems: [
+        { stockItemUuid: 'papel', stockItemPackagingUOMUuid: 'pu-caja', quantity: 3, batchNo: 'SIN-LOTE' },
+      ],
     });
     expect(posts[1]).toEqual({
       url: expect.stringMatching(/stockoperationaction$/),
@@ -164,7 +166,10 @@ describe('registerMovement', () => {
       config,
       { sitePartyUuid: 'party-sm', responsibleUserUuid: 'user-1', batches: [] },
     );
-    expect(posts[0].body.stockOperationItems[0]).toMatchObject({ batchNo: 'AB123', expiration: expect.stringMatching(/^2027-05-3/) });
+    expect(posts[0].body.stockOperationItems[0]).toMatchObject({
+      batchNo: 'AB123',
+      expiration: expect.stringMatching(/^2027-05-3/),
+    });
   });
 
   it('egreso: crea un Adjustment negativo repartido por lotes, en unidades base', async () => {
@@ -245,7 +250,9 @@ describe('Registrar movimiento desde la tabla', () => {
       sourceUuid: 'party-proveedor',
       destinationUuid: 'party-sm',
       responsiblePersonUuid: 'user-1',
-      stockOperationItems: [{ stockItemUuid: 'papel', stockItemPackagingUOMUuid: 'pu-unidad', quantity: 30, batchNo: 'SIN-LOTE' }],
+      stockOperationItems: [
+        { stockItemUuid: 'papel', stockItemPackagingUOMUuid: 'pu-unidad', quantity: 30, batchNo: 'SIN-LOTE' },
+      ],
     });
     expect(posts[1].body).toMatchObject({ uuid: 'operation-1', name: 'COMPLETE' });
   });

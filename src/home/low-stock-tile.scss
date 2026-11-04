@@ -1,0 +1,67 @@
+@use '@carbon/type';
+@use '@carbon/colors';
+@use '@carbon/layout';
+
+// Mismo formato que las tarjetas de inicio de O3 (Visitas activas, Turnos)
+.tileContainer {
+  display: flex;
+  flex-direction: column;
+  background-color: colors.$white;
+  border: 1px solid colors.$gray-20;
+  min-height: 7.875rem;
+  padding: layout.$spacing-05;
+  margin: layout.$spacing-03;
+}
+
+.tileHeader {
+  @include type.type-style('heading-01');
+  font-weight: 600;
+  line-height: 1.28572;
+  letter-spacing: 0.16px;
+  color: colors.$gray-70;
+}
+
+.displayDetails {
+  margin-top: layout.$spacing-06;
+}
+
+.countLabel {
+  @include type.type-style('label-01');
+  color: colors.$gray-70;
+}
+
+.dataRow {
+  display: flex;
+  align-items: baseline;
+  gap: layout.$spacing-03;
+}
+
+.displayData,
+.displayDataAlert {
+  font-size: 1.75rem;
+  font-weight: 400;
+  line-height: 1.28572;
+  color: colors.$black;
+}
+
+.displayDataAlert {
+  color: colors.$red-60;
+}
+
+.breakdown {
+  @include type.type-style('label-01');
+  color: colors.$gray-70;
+}
+
+.errorText {
+  @include type.type-style('label-01');
+  color: colors.$red-60;
+}
+
+.skeleton {
+  max-width: 4rem;
+}
+
+.link {
+  margin-top: layout.$spacing-03;
+}

@@ -15,10 +15,39 @@
       "name": "residencia-inventory-app-menu-item",
       "component": "inventoryAppMenuItem",
       "slot": "app-menu-item-slot",
-      "privileges": ["App: stockmanagement.stockItems"],
+      "privileges": [
+        "App: stockmanagement.stockItems"
+      ],
       "meta": {
         "name": "Inventario"
       }
+    },
+    {
+      "name": "residencia-inventory-dashboard-link",
+      "slot": "homepage-dashboard-slot",
+      "component": "inventoryDashboardLink",
+      "privileges": [
+        "App: stockmanagement.stockItems"
+      ],
+      "meta": {
+        "name": "inventario",
+        "slot": "inventario-dashboard-slot",
+        "title": "Inventario"
+      },
+      "order": 11
+    },
+    {
+      "name": "residencia-inventory-dashboard",
+      "slot": "inventario-dashboard-slot",
+      "component": "inventoryDashboard"
+    },
+    {
+      "name": "residencia-low-stock-tile",
+      "slot": "home-metrics-tiles-slot",
+      "component": "lowStockTile",
+      "privileges": [
+        "App: stockmanagement.stockItems"
+      ]
     }
   ]
 }
